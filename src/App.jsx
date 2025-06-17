@@ -1,10 +1,14 @@
 
+import Header from './components/Header';
+import VideoCarousel from './components/VideoCarousel';
 import Chatbot from './components/Chatbot';
-import './styles/chatbot.css';
+
 
 function App() {
   return (
-    <div className="app-container">
+    <div>
+      <Header />
+      <VideoCarousel />
       <Chatbot />
     </div>
   );

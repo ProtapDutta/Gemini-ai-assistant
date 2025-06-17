@@ -9,20 +9,22 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [minimized, setMinimized] = useState(false);
-  const chatBodyRef = useRef(null); // Add ref
+  const [loading, setLoading] = useState(false); // Add loading state
+  const chatBodyRef = useRef(null);
 
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
-  }, [messages, minimized]); 
+  }, [messages, minimized, loading]); // Add loading
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return; // Prevent sending while loading
 
     const userMessage = { from: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    setLoading(true); // Set loading
 
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -49,11 +51,13 @@ const Chatbot = () => {
         ...prev,
         { from: 'bot', text: 'Sorry, something went wrong.' }
       ]);
+    } finally {
+      setLoading(false); // Reset loading
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter' && !loading) sendMessage(); // Prevent sending while loading
   };
 
   return (
@@ -74,6 +78,11 @@ const Chatbot = () => {
             {messages.map((msg, i) => (
               <ChatMessage key={i} msg={msg} />
             ))}
+            {loading && (
+              <div className="chat-message bot">
+                <em>Thinking...</em>
+              </div>
+            )}
           </div>
           <div className="chat-input">
             <input
@@ -83,7 +92,7 @@ const Chatbot = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
             />
-            <button onClick={sendMessage}>➤</button>
+            <button onClick={sendMessage} disabled={loading}>➤</button>
           </div>
         </>
       )}
