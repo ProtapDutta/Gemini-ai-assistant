@@ -82,4 +82,3 @@ This is a **React-based frontend** for a Tata Motors-themed website. It features
 
 ---
 
-Let me know if you want a more technical deep-dive or a higher-level summary!
