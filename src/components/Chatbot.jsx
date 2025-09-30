@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-// 1. **UPDATE SDK IMPORT:** Change from '@google/generative-ai' 
-//    to the new, unified '@google/genai'
 import { GoogleGenAI } from '@google/genai'; 
 import ChatMessage from './ChatMessage';
 import CONTEXT from './Context';
 
-// 2. **UPDATE CLIENT INITIALIZATION:** Instantiate the new client.
-//    The key is automatically picked up from the environment variable (VITE_GEMINI_API_KEY).
+// Initialize the new client
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY }); 
 
 const Chatbot = () => {
@@ -31,32 +28,30 @@ const Chatbot = () => {
         setLoading(true);
 
         try {
-            // **3. UPDATE MODEL NAME and CHAT STRUCTURE**
-            // The recommended model is 'gemini-2.5-flash' (alias for the latest stable flash model)
             const modelName = 'gemini-2.5-flash'; 
 
-            // Create the initial history/context array for the model.
-            // This sets the context for the *entire* chat session.
+            // **MODIFICATION 1: Update CONTEXT to include conciseness instruction**
+            // Note: I assume CONTEXT is imported from './Context', so you'd update that file.
+            // For this example, I'll simulate the instruction by pre-pending it here.
+            const CONCISE_INSTRUCTION = "You are a TATA Motors Assistant. Your goal is to provide **short, direct, and concise answers**, ideally in 1-3 sentences. Do not elaborate unless asked.";
+            
             const initialHistory = [
                 {
                     role: 'user',
-                    parts: [{ text: CONTEXT }]
+                    // Use the combination of the CONCISE_INSTRUCTION and the CONTEXT
+                    parts: [{ text: CONCISE_INSTRUCTION + '\n\n' + CONTEXT }] 
                 },
                 {
-                    // You must follow an 'user' message with a 'model' message 
-                    // to complete the turn structure for history.
                     role: 'model',
-                    parts: [{ text: "Acknowledged. How can I assist you with TATA Motors today?" }]
+                    parts: [{ text: "Acknowledged. I will provide concise answers about TATA Motors. How can I assist you today?" }]
                 }
             ];
 
-            // Map existing messages into the format required for a new chat session history
             const existingHistory = messages.map(msg => ({
                 role: msg.from === 'user' ? 'user' : 'model',
                 parts: [{ text: msg.text }]
             }));
 
-            // Combine the initial system context with the existing chat history
             const fullHistory = [...initialHistory, ...existingHistory];
             
             // Initiate a new chat session with the full history
@@ -64,12 +59,14 @@ const Chatbot = () => {
                 model: modelName,
                 history: fullHistory,
                 config: {
-                    temperature: 0.7 
+                    temperature: 0.7, 
+                    // **MODIFICATION 2: ADD MAX OUTPUT TOKENS**
+                    // This is the most effective way to limit response length.
+                    // 50 tokens is usually enough for 2-3 concise sentences.
+                    maxOutputTokens: 50 
                 }
             });
 
-            // Send the new user input message to the chat session
-            // NOTE: The CONTEXT is now only in the history, not prepended to every message.
             const result = await chat.sendMessage({ message: input });
             const responseText = result.text;
 
@@ -85,7 +82,6 @@ const Chatbot = () => {
         }
     };
 
-    // ... (rest of the component remains the same)
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !loading) sendMessage();
     };
