@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.env # Added to explicitly ignore environment variable files
+.env.* # Added to ignore all variant environment files like .env.local, .env.development, etc.
 
 node_modules
 dist
