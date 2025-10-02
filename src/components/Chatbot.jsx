@@ -69,15 +69,15 @@ const Chatbot = () => {
                 history: fullHistory,
                 config: {
                     temperature: 0.7,
-                    // **2. CRITICAL FIX FOR LENGTH:** 
-                    // // Set a low maxOutputTokens to force conciseness. 50 tokens ~ 2-3 sentences[cite: 13].
+                    // **2. FIX FOR LENGTH ** 
+                    // // Set a low maxOutputTokens to force conciseness. 50 tokens ~ 2-3 sentences
                     maxOutputTokens: 50 
                 }
             });
 
             // Send the new user input message to the chat session
             const result = await chat.sendMessage({ message: input }); 
-            const responseText = result.text;
+            const responseText = result?.text || 'No response received.';
 
             setMessages(prev => [...prev, { from: 'bot', text: responseText }]);
         } catch (err) {
